@@ -33,7 +33,10 @@ window.onload = function () {
     });
 
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-        if (request.failed || request.ended) {
+        if (request.failed) {
+            document.getElementById("playpause").value = "Start";
+            document.getElementById("error").innerHTML = "Please refresh the page.";
+        } else if (request.ended) {
             document.getElementById("playpause").value = "Start";
         }
     });

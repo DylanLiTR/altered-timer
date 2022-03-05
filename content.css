@@ -1,9 +1,9 @@
 #kronos {
     width: 160px;
     height: 60px;
-    position: fixed;
+    position: absolute;
     right: 10px;
-    bottom: 10px;
+    top: 10px;
     font-size: 20px;
     display: flex;
     align-items: center;
@@ -11,4 +11,5 @@
     background-color: #222222;
     display: none;
     border: 3px solid teal;
+    z-index: 2147483647;
 }

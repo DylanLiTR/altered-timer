@@ -1,6 +1,6 @@
 
 body {
-    width: 200px;
+    width: 160px;
     background-color: #212121;
     color: #E0E0E0;
     font-size: 16px;
@@ -9,4 +9,17 @@ body {
 input {
     padding: 4px 8px;
     margin: 2px;
+}
+
+input[type="number"] {
+    width: 40px;
+}
+
+input[type="submit"] {
+    cursor: pointer;
+}
+
+#error {
+    font-size: 14px;
+    color: red;
 }
