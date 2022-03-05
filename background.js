@@ -1,8 +1,3 @@
-// Things to implement next:
-// * Change colour on timer end
-// * Style popup
-// * Error: 
-
 var counting = false;
 var stop = false;
 var paused = false;
@@ -19,7 +14,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         paused = true;
         countdown(request.dur, request.spd);
     } else if (request.query === "Already counting?") {
-        sendResponse({counting});
+        let running = counting && !paused;
+        sendResponse({running});
     } else if (request.pause) {
         paused = true;
     }
@@ -28,6 +24,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 async function countdown(duration, speed) {
     let interval = 1000 / speed;
     let sec = duration * 60;
+    counting = true;
 
     try {
         var tabId = await getTabId();

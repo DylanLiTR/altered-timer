@@ -3,23 +3,23 @@ window.onload = function () {
     let speed = document.getElementById("speed");
 
     chrome.runtime.sendMessage({query: "Already counting?"}, function(response) {
-        if (response.counting) {
+        if (response.running) {
             document.getElementById("playpause").value = "Pause";
         }
     });
 
     document.getElementById("form").addEventListener("submit", function (e) {
         e.preventDefault();
-        let running = document.activeElement.getAttribute('value');
+        let status = document.activeElement.getAttribute('value');
         let playpause = document.getElementById("playpause");
-        if (running === "Pause") {
+        if (status === "Pause") {
             pause();
             playpause.value = "Start";
-        } else if (running === "Start") {
-            setTimer(running);
+        } else if (status === "Start") {
+            setTimer(status);
             playpause.value = "Pause";
-        } else if (running === "Reset") {
-            setTimer(running);
+        } else if (status === "Reset") {
+            setTimer(status);
             playpause.value = "Start";
         }
     });
@@ -54,11 +54,11 @@ function save() {
     chrome.storage.local.set({speed, duration});
 }
 
-function setTimer(running) {
+function setTimer(status) {
     let duration = document.getElementById("duration").value;
     let speed = document.getElementById("speed").value;
 
-    chrome.runtime.sendMessage({run: running, dur: duration, spd: speed});
+    chrome.runtime.sendMessage({run: status, dur: duration, spd: speed});
 }
 
 function pause() {

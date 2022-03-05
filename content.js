@@ -50,8 +50,13 @@ function dragElement(elmnt) {
       pos4 = e.clientY;
 
       // set the element's new position:
-      elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-      elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+      let bounds = elmnt.getBoundingClientRect();
+      if (elmnt.offsetTop - pos2 > 0 && bounds.bottom - pos2 < window.innerHeight) {
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+      }
+      if (elmnt.offsetLeft - pos1 > 0 && bounds.right - pos1 < document.body.clientWidth) {
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+      }
     }
   
     function closeDragElement() {
