@@ -1,0 +1,36 @@
+{
+    "manifest_version": 3,
+
+    "name": "Kronos",
+    "description": "Alter your perception of time",
+    "version": "1.0",
+
+    "background": {
+        "service_worker": "background.js"
+    },
+
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"],
+            "css": ["content.css"]
+        }
+    ],
+    
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "images/timer.png",
+            "32": "images/timer.png"
+        }
+    },
+    "icons": {
+        "16": "images/timer.png",
+        "32": "images/timer.png"
+    },
+
+    "permissions": [
+        "activeTab",
+        "storage"
+    ]
+}
