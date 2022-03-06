@@ -1,9 +1,12 @@
+// create the timer interface
 let div = document.createElement("div");
 div.id = "kronos";
 dragElement(div);
 document.body.appendChild(div);
 
+// tell the background script to create a new port
 chrome.runtime.sendMessage({newPort: true}, function(response) {
+    // if successful, set the timer value and show the timer if it should not be hidden
     if (response !== undefined) {
         div.innerHTML = Math.floor(response.time / 60) + ":" + ("00" + (response.time % 60)).slice(-2);
         if (!response.hidden) {
@@ -12,23 +15,29 @@ chrome.runtime.sendMessage({newPort: true}, function(response) {
     }
 });
 
+// listen for the connection to the background script
 chrome.runtime.onConnect.addListener(function(port) {
+    // check if the port name is correct
     console.assert(port.name == "timer");
 
+    // listen for post messages
     port.onMessage.addListener(function(msg) {
+        // get the timer div
         let kronos = document.getElementById("kronos");
-        if (msg.visiblility === "Show") {
+        
+        if (msg.visibility === "Show") { // show the timer
             show();
-        } else if (msg.visiblility === "Hide") {
+        } else if (msg.visibility === "Hide") { // hide the timer
             kronos.style.display = "none";
-        } else if (msg.ended) {
+        } else if (msg.ended) { // turn the timer red when ended
             kronos.style.borderColor = kronos.style.color = "red";
-        } else {
+        } else { // show the timer progress
             kronos.innerHTML = Math.floor(msg.time / 60) + ":" + ("00" + (msg.time % 60)).slice(-2);
         }
     });
 });
 
+// shows the timer
 function show() {
     let kronos = document.getElementById("kronos");
     kronos.style.borderColor = "teal";
