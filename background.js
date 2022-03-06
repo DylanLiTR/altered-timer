@@ -9,6 +9,11 @@ var ports = [];
 // listen for requests
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.run === "Start") {
+        // add port if none are left due to timeout
+        if (ports.length === 0) {
+            addPort();
+        }
+
         // show the timer
         hidden = false;
         toggleVisibility("Show");

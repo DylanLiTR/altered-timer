@@ -12,7 +12,7 @@ input {
 }
 
 input[type="number"] {
-    width: 40px;
+    width: 60px;
 }
 
 input[type="submit"] {

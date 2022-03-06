@@ -30,6 +30,7 @@ chrome.runtime.onConnect.addListener(function(port) {
         } else if (msg.visibility === "Hide") { // hide the timer
             kronos.style.display = "none";
         } else if (msg.ended) { // turn the timer red when ended
+            kronos.style.display = "flex";
             kronos.style.borderColor = kronos.style.color = "red";
         } else { // show the timer progress
             kronos.innerHTML = Math.floor(msg.time / 60) + ":" + ("00" + (msg.time % 60)).slice(-2);
