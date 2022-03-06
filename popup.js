@@ -8,19 +8,32 @@ window.onload = function () {
         }
     });
 
+    chrome.runtime.sendMessage({query: "Timer hidden?"}, function(response) {
+        if (response !== undefined && response.hidden) {
+            document.getElementById("visibility").value = "Show";
+        }
+    });
+
     document.getElementById("form").addEventListener("submit", function (e) {
         e.preventDefault();
         let status = document.activeElement.getAttribute('value');
         let playpause = document.getElementById("playpause");
-        if (status === "Pause") {
-            pause();
-            playpause.value = "Start";
-        } else if (status === "Start") {
+        if (status === "Start") {
             setTimer(status);
             playpause.value = "Pause";
+            document.getElementById("visibility").value = "Hide";
+        } else if (status === "Pause") {
+            pause();
+            playpause.value = "Start";
         } else if (status === "Reset") {
             setTimer(status);
             playpause.value = "Start";
+        } else if (status === "Hide") {
+            document.getElementById("visibility").value = "Show";
+            chrome.runtime.sendMessage({visiblility: "Hide"});
+        } else if (status === "Show") {
+            document.getElementById("visibility").value = "Hide";
+            chrome.runtime.sendMessage({visiblility: "Show"});
         }
     });
 

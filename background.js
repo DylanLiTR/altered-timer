@@ -1,76 +1,103 @@
 var counting = false;
-var stop = false;
 var paused = false;
+var hidden = true;
+var timer;
+var sec = 0;
+var ports = [];
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.run === "Start") {
+        hidden = false;
+        toggleVisibility("Show");
         if (paused) {
             paused = false;
         } else {
             countdown(request.dur, request.spd);
         }
     } else if (request.run === "Reset") {
-        stop = true;
+        hidden = false;
+        toggleVisibility("Show");
         paused = true;
+        clearInterval(timer);
         countdown(request.dur, request.spd);
     } else if (request.query === "Already counting?") {
         let running = counting && !paused;
         sendResponse({running});
+    } else if (request.query === "Timer hidden?") {
+        sendResponse({hidden});
     } else if (request.pause) {
         paused = true;
+    } else if (request.visiblility === "Show" || request.visiblility === "Hide") {
+        hidden = !hidden;
+        toggleVisibility(request.visiblility);
+    }
+});
+
+function toggleVisibility(v) {
+    let len = ports.length;
+    for (let i = 0; i < len; ++i) {
+        ports[i].postMessage({visiblility: v});
+    }
+}
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.newPort) {
+        addPort();
+    }
+    if (counting) {
+        sendResponse({time: sec+1, hidden});
     }
 });
 
 async function countdown(duration, speed) {
     let interval = 1000 / speed;
-    let sec = duration * 60;
+    sec = duration * 60;
     counting = true;
 
-    try {
-        var tabId = await getTabId();
-        var port = chrome.tabs.connect(tabId, {name: "timer"});
-        port.postMessage({time: sec});
-    } catch (e) {
-        problem(e);
-        return -1;
+    let len = ports.length;
+    for (let i = 0; i < len; ++i) {
+        ports[i].postMessage({time: sec});
     }
-    console.log("connected to " + tabId);
 
-    let timer = setInterval(function() {
+    timer = setInterval(function() {
         if (sec < 0) {
             clearInterval(timer);
             counting = false;
-            port.postMessage({ended: true});
+            for (let i = 0; i < ports.length; ++i) {
+                ports[i].postMessage({ended: true});
+            }
             chrome.runtime.sendMessage({ended: true});
-        } else if (stop) {
+        } else if (ports.length === 0) {
             clearInterval(timer);
-            stop = false;
+            problem("No tabs found.");
+            return -1;
         } else if (!paused) {
-            try {
-                port.postMessage({time: sec});
-            } catch (e) {
-                problem(e);
-                clearInterval(timer);
-                return -1;
+            for (let i = 0; i < ports.length; ++i) {
+                try {
+                    ports[i].postMessage({time: sec});
+                } catch (e) {
+                    ports.splice(i, 1);
+                }
             }
             sec--;
         }
     }, interval);
 }
 
-async function getTabId() {
+function addPort() {
     let queryOptions = { active: true, currentWindow: true };
-    let [tab] = await chrome.tabs.query(queryOptions);
-
-    if (tab === undefined) {
-        throw "Tab could not be found.";
-    }
-    return tab.id;
+    chrome.tabs.query(queryOptions).then(function([tab]) {
+        port = chrome.tabs.connect(tab.id, {name: "timer"});
+        port.onDisconnect.addListener(function() {
+            ports.splice(ports.indexOf(port), 1);
+        })
+        ports.push(port);
+    });
 }
 
 function problem(e) {
     console.log(e);
 
-    counting = stop = paused = false;
+    counting = paused = false;
     chrome.runtime.sendMessage({failed: true});
 }
